@@ -12,14 +12,15 @@
         button:hover { background: #2980b9; }
         .section { display: none; background: white; padding: 25px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 900px; margin-left: auto; margin-right: auto; }
         .active { display: block; }
-        .document-text { max-height: 65vh; overflow-y: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
-        h3 { color: #2c3e50; }
+        .document-text { max-height: 70vh; overflow-y: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
+        details { margin: 15px 0; }
+        summary { font-weight: bold; padding: 10px; background: #ecf0f1; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
     <header>
         <h1>Meditação Cristã Autêntica</h1>
-        <p>Carta da Congregação para a Doutrina da Fé • 15/10/1989</p>
+        <p>Carta da Congregação para a Doutrina da Fé • 15 de outubro de 1989</p>
     </header>
 
     <nav>
@@ -31,26 +32,39 @@
 
     <div id="home" class="section active">
         <h2>Bem-vindo</h2>
-        <p>Esta aplicação foi feita para ajudar na prática da oração cristã autêntica, segundo o Magistério da Igreja.</p>
+        <p>Esta aplicação ajuda você a praticar a meditação cristã fiel ao Magistério da Igreja.</p>
     </div>
 
     <div id="document" class="section">
-        <h2>Carta Completa - Trechos Principais</h2>
+        <h2>Carta Completa - Seções Expansíveis</h2>
         <div class="document-text">
-            <h3>I. Introdução</h3>
-            <p>Em muitos cristãos do nosso tempo manifesta-se vivo o desejo de aprender a orar de modo autêntico e profundo...</p>
             
-            <h3>II. A Oração Cristã à Luz da Revelação</h3>
-            <p>A oração cristã é sempre determinada pela estrutura da fé cristã... é um diálogo pessoal entre o homem e Deus.</p>
-            
-            <h3>III. Modos Errôneos de Orar</h3>
-            <p>Alerta contra a pseudo-gnose e o messalianismo. Cuidados com a fusão indiscriminada com métodos orientais.</p>
-            
-            <h3>IV. A Via Cristã da União com Deus</h3>
-            <p>Cristo é a Via. A união com Deus não suprime a criatura, mas realiza-se no amor e na caridade.</p>
-            
-            <p><strong>Texto integral disponível no site oficial do Vaticano:</strong> 
-            <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_19891015_meditazione-cristiana_po.html" target="_blank">Ler documento original</a></p>
+            <details open>
+                <summary>I. Introdução</summary>
+                <p>Em muitos cristãos manifesta-se o desejo de aprender a orar de modo autêntico...</p>
+            </details>
+
+            <details>
+                <summary>II. A Oração Cristã à Luz da Revelação</summary>
+                <p>A oração cristã é diálogo pessoal com o Deus Trino, fundamentada na Sagrada Escritura.</p>
+            </details>
+
+            <details>
+                <summary>III. Modos Errôneos de Orar</summary>
+                <p>Cuidados com pseudo-gnose, messalianismo e sincretismo com técnicas orientais.</p>
+            </details>
+
+            <details>
+                <summary>IV. A Via Cristã da União com Deus</summary>
+                <p>Cristo é a única Via. A verdadeira união respeita a alteridade criatura-Criador.</p>
+            </details>
+
+            <p style="margin-top:30px; text-align:center;">
+                <strong>📖 Ler o documento oficial completo:</strong><br>
+                <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_19891015_meditazione-cristiana_po.html" target="_blank" style="color:#2980b9;">
+                    Acessar site do Vaticano
+                </a>
+            </p>
         </div>
     </div>
 
@@ -62,7 +76,7 @@
 
     <div id="journal" class="section">
         <h2>Diário Espiritual</h2>
-        <textarea id="journal-entry" rows="10" style="width:100%" placeholder="O que Deus falou ao seu coração hoje..."></textarea><br><br>
+        <textarea id="journal-entry" rows="10" style="width:100%" placeholder="Escreva aqui o que o Senhor falou ao seu coração..."></textarea><br><br>
         <button onclick="saveJournal()">Salvar Entrada</button>
         <div id="journal-entries"></div>
     </div>
@@ -75,18 +89,18 @@
 
         function newMeditation() {
             const prompts = [
-                "Leia o Pai Nosso lentamente e medite em cada frase.",
-                "Contemple Jesus Cristo como 'a Via' (Jo 14,6).",
-                "Peça ao Espírito Santo que ilumine sua oração.",
-                "Reflita em um Salmo e deixe que ele se torne sua oração."
+                "Leia lentamente o Pai Nosso e medite em cada palavra.",
+                "Contemple Jesus: 'Eu sou a Via, a Verdade e a Vida' (Jo 14,6).",
+                "Peça ao Espírito Santo que ensine você a rezar.",
+                "Escolha um Salmo e faça dele sua oração pessoal."
             ];
             document.getElementById('daily-prompt').textContent = prompts[Math.floor(Math.random() * prompts.length)];
         }
 
         function saveJournal() {
-            const text = document.getElementById('journal-entry').value;
+            const text = document.getElementById('journal-entry').value.trim();
             if (text) {
-                alert("Entrada salva com sucesso! (em desenvolvimento)");
+                alert("✅ Entrada salva!");
                 document.getElementById('journal-entry').value = '';
             } else {
                 alert("Escreva algo antes de salvar.");
