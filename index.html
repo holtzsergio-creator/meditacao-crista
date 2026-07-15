@@ -1091,18 +1091,37 @@
     // ============================================================
     //  INICIALIZAÇÃO
     // ============================================================
-    buildClockTicks();
-    resetTimerUI();
-    updateStepUI();
-    renderJournal();
-    updateLiturgicalBadge();
-    loadRandomMeditation();
-
-    document.querySelector('.timer-controls .selected')?.click();
-
-    document.getElementById('next-after-timer').addEventListener('click', function() {
-        if (currentStep === 2) {
-            nextStep();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Garante que o DOM está carregado
+        buildClockTicks();
+        resetTimerUI();
+        updateStepUI();
+        renderJournal();
+        
+        // Atualiza o badge litúrgico
+        const badge = document.getElementById('liturgicalBadge');
+        if (badge) {
+            const tempo = getTempoLiturgico();
+            const nome = getNomeTempo(tempo);
+            badge.textContent = `📅 Tempo Litúrgico: ${nome}`;
+        } else {
+            console.warn('Elemento liturgicalBadge não encontrado!');
+        }
+        
+        loadRandomMeditation();
+        
+        // Seleciona o tempo padrão do timer
+        const defaultTimer = document.querySelector('.timer-controls .selected');
+        if (defaultTimer) defaultTimer.click();
+        
+        // Evento para o botão "Prosseguir" após o timer
+        const nextBtn = document.getElementById('next-after-timer');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                if (currentStep === 2) {
+                    nextStep();
+                }
+            });
         }
     });
 </script>
