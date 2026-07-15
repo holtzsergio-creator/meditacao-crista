@@ -65,6 +65,17 @@
             margin-top: 8px;
         }
 
+        .liturgical-badge {
+            display: inline-block;
+            background: #e8e0d8;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #4a5b66;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
         nav {
             display: flex;
             flex-wrap: wrap;
@@ -508,7 +519,8 @@
 
     <header>
         <h1>Meditação Cristã <span>autêntica</span></h1>
-        <p>Baseado na Carta da Congregação para a Doutrina da Fé • 15 out 1989</p>
+        <p>Cf. Carta da Congregação para a Doutrina da Fé • 15 out 1989</p>
+        <div class="liturgical-badge" id="liturgicalBadge">📅 Tempo Litúrgico: Carregando...</div>
     </header>
 
     <nav>
@@ -554,7 +566,7 @@
                 <h3 style="font-weight:400;">📖 Leitura</h3>
                 <p style="color:#4a5b66;">Leia lentamente este trecho, deixando que cada palavra ecoe no coração.</p>
                 <div class="meditation-text" id="reading-text">
-                    <strong>«O Pai-Nosso»</strong> — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>
+                    <strong>Carregando meditação...</strong>
                 </div>
                 <button class="btn-primary" onclick="nextStep()">Prosseguir →</button>
             </div>
@@ -683,6 +695,89 @@
             sections[id].classList.add('active');
         });
     });
+
+    // ============================================================
+    //  CÁLCULO DO TEMPO LITÚRGICO
+    // ============================================================
+
+    function calcularPascoa(ano) {
+        // Método de Gauss (válido 1900-2099)
+        const a = ano % 19;
+        const b = Math.floor(ano / 100);
+        const c = ano % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const mes = Math.floor((h + l - 7 * m + 114) / 31);
+        const dia = ((h + l - 7 * m + 114) % 31) + 1;
+        return new Date(ano, mes - 1, dia);
+    }
+
+    function getTempoLiturgico() {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const pascoa = calcularPascoa(ano);
+        
+        // Datas fixas
+        const natal = new Date(ano, 11, 25);
+        const batismo = new Date(ano, 0, 6); // Epifania (simplificado)
+        const pentecostes = new Date(pascoa);
+        pentecostes.setDate(pascoa.getDate() + 49); // 50º dia (domingo)
+        
+        // Advento: 4 domingos antes do Natal (começa no domingo mais próximo de 30/11)
+        const advento = new Date(natal);
+        advento.setDate(natal.getDate() - 21); // aproximação (4 domingos)
+        while (advento.getDay() !== 0) { // procura o domingo
+            advento.setDate(advento.getDate() - 1);
+        }
+        
+        // Quaresma: Quarta-feira de Cinzas (46 dias antes da Páscoa)
+        const quartaCinzas = new Date(pascoa);
+        quartaCinzas.setDate(pascoa.getDate() - 46);
+        
+        // Sábado Santo (véspera da Páscoa)
+        const sabadoSanto = new Date(pascoa);
+        sabadoSanto.setDate(pascoa.getDate() - 1);
+        
+        // Determina o tempo litúrgico
+        if (hoje >= advento && hoje < natal) {
+            return 'advento';
+        } else if (hoje >= natal && hoje <= batismo) {
+            return 'natal';
+        } else if (hoje >= quartaCinzas && hoje <= sabadoSanto) {
+            return 'quaresma';
+        } else if (hoje >= pascoa && hoje < pentecostes) {
+            return 'pascoa';
+        } else {
+            return 'comum';
+        }
+    }
+
+    function getNomeTempo(tempo) {
+        const nomes = {
+            'advento': 'Advento',
+            'natal': 'Natal',
+            'quaresma': 'Quaresma',
+            'pascoa': 'Páscoa',
+            'comum': 'Tempo Comum'
+        };
+        return nomes[tempo] || 'Tempo Comum';
+    }
+
+    // ============================================================
+    //  EXIBE O TEMPO LITÚRGICO NO CABEÇALHO
+    // ============================================================
+    function updateLiturgicalBadge() {
+        const tempo = getTempoLiturgico();
+        const nome = getNomeTempo(tempo);
+        document.getElementById('liturgicalBadge').textContent = `📅 Tempo Litúrgico: ${nome}`;
+    }
 
     // ============================================================
     //  TIMER ANALÓGICO MINIMALISTA - CONSTRUÇÃO
@@ -868,16 +963,58 @@
     }
 
     // ============================================================
-    //  CARREGAR UMA MEDITAÇÃO ALEATÓRIA
+    //  CARREGAR UMA MEDITAÇÃO ALEATÓRIA (COM FILTRO LITÚRGICO)
     // ============================================================
+    let ultimaMeditacao = -1;
+
     function loadRandomMeditation() {
-        const med = getRandomMeditacao();
+        const tempo = getTempoLiturgico();
+        let meditacoesFiltradas = [];
+        
+        // Filtra as meditações pelo tempo litúrgico
+        if (tempo === 'advento') {
+            meditacoesFiltradas = meditacoes.filter(m => 
+                m.categoria === 'advento' || m.categoria === 'geral'
+            );
+        } else if (tempo === 'natal') {
+            meditacoesFiltradas = meditacoes.filter(m => 
+                m.categoria === 'natal' || m.categoria === 'geral'
+            );
+        } else if (tempo === 'quaresma') {
+            meditacoesFiltradas = meditacoes.filter(m => 
+                m.categoria === 'quaresma' || m.categoria === 'semana-santa' || m.categoria === 'geral'
+            );
+        } else if (tempo === 'pascoa') {
+            meditacoesFiltradas = meditacoes.filter(m => 
+                m.categoria === 'pascoa' || m.categoria === 'geral'
+            );
+        } else { // Tempo Comum
+            meditacoesFiltradas = meditacoes.filter(m => 
+                m.categoria === 'comum' || m.categoria === 'geral'
+            );
+        }
+        
+        // Se não houver meditações filtradas, usa todas
+        if (meditacoesFiltradas.length === 0) {
+            meditacoesFiltradas = meditacoes;
+        }
+        
+        // Escolhe uma aleatória (evita repetir a última)
+        let index;
+        do {
+            index = Math.floor(Math.random() * meditacoesFiltradas.length);
+        } while (index === ultimaMeditacao && meditacoesFiltradas.length > 1);
+        ultimaMeditacao = index;
+        
+        const med = meditacoesFiltradas[index];
         const textElement = document.getElementById('reading-text');
-        // Mostra título e texto
         textElement.innerHTML = `<strong>${med.titulo}</strong><br><br>${med.texto}`;
         if (med.referencia) {
             textElement.innerHTML += `<br><br><span style="font-size:0.8em; color:#a99b8c;">— ${med.referencia}</span>`;
         }
+        
+        // Mostra no console qual tempo litúrgico está ativo (para depuração)
+        console.log(`📅 Tempo Litúrgico: ${getNomeTempo(tempo).toUpperCase()} | Meditação: ${med.titulo}`);
     }
 
     function resetMeditation() {
@@ -958,7 +1095,8 @@
     resetTimerUI();
     updateStepUI();
     renderJournal();
-    loadRandomMeditation();  // <-- Carrega a primeira meditação
+    updateLiturgicalBadge();
+    loadRandomMeditation();
 
     document.querySelector('.timer-controls .selected')?.click();
 
