@@ -304,7 +304,6 @@
             z-index: 4;
         }
 
-        /* Pequenos traços de marcação (mais discretos) */
         .clock-tick {
             position: absolute;
             top: 0;
@@ -569,7 +568,7 @@
                 <div class="timer-controls">
                     <button class="selected" data-time="5">5 min</button>
                     <button data-time="10">10 min</button>
-                    <button data-time="15">15 min</button>
+                    <button data-time="20">20 min</button>
                 </div>
 
                 <!-- Timer analógico minimalista -->
@@ -691,14 +690,42 @@
         const container = document.getElementById('clockTicks');
         container.innerHTML = '';
 
-        // Apenas 12 traços principais (como um relógio sem números)
         for (let i = 0; i < 12; i++) {
             const tick = document.createElement('div');
             tick.className = 'clock-tick';
-            if (i % 3 === 0) tick.classList.add('major'); // destaque a cada 3 horas
+            if (i % 3 === 0) tick.classList.add('major');
             const angle = i * 30;
             tick.style.transform = `rotate(${angle}deg)`;
             container.appendChild(tick);
+        }
+    }
+
+    // ============================================================
+    //  SOM DO SINO - 3 TOQUES
+    // ============================================================
+    function playBell() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const frequencies = [880, 660, 880];
+            const durations = [0.15, 0.15, 0.15];
+            const gaps = [0.2, 0.2, 0];
+
+            frequencies.forEach((freq, index) => {
+                const delay = gaps.slice(0, index).reduce((a, b, i) => a + b + durations[i], 0) || 0;
+                setTimeout(() => {
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + durations[index]);
+                }, delay * 1000);
+            });
+        } catch (e) {
+            // Fallback silencioso se o áudio não for suportado
         }
     }
 
@@ -799,19 +826,8 @@
                 timerRunning = false;
                 timerFinished = true;
                 startBtn.textContent = '🔔 Recomeçar';
-                bellMsg.textContent = '🔔 SINOOOO! O silêncio terminou.';
-                try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    oscillator.frequency.value = 880;
-                    oscillator.type = 'sine';
-                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.6);
-                } catch (e) { /* fallback */ }
+                bellMsg.textContent = '🔔🔔🔔 O silêncio terminou!';
+                playBell(); // <-- 3 toques
                 nextAfterTimer.style.display = 'inline-block';
                 return;
             }
