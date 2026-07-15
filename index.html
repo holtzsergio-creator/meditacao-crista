@@ -661,6 +661,7 @@
 
 </div>
 
+<script src="meditacoes.js"></script>
 <script>
     // ============================================================
     //  NAVEGAÇÃO
@@ -827,7 +828,7 @@
                 timerFinished = true;
                 startBtn.textContent = '🔔 Recomeçar';
                 bellMsg.textContent = '🔔🔔🔔 O silêncio terminou!';
-                playBell(); // <-- 3 toques
+                playBell();
                 nextAfterTimer.style.display = 'inline-block';
                 return;
             }
@@ -866,19 +867,26 @@
         }
     }
 
+    // ============================================================
+    //  CARREGAR UMA MEDITAÇÃO ALEATÓRIA
+    // ============================================================
+    function loadRandomMeditation() {
+        const med = getRandomMeditacao();
+        const textElement = document.getElementById('reading-text');
+        // Mostra título e texto
+        textElement.innerHTML = `<strong>${med.titulo}</strong><br><br>${med.texto}`;
+        if (med.referencia) {
+            textElement.innerHTML += `<br><br><span style="font-size:0.8em; color:#a99b8c;">— ${med.referencia}</span>`;
+        }
+    }
+
     function resetMeditation() {
         currentStep = 1;
         updateStepUI();
         document.getElementById('reflection-text').value = '';
         document.getElementById('bell-message').textContent = '';
         resetTimerUI();
-        const readings = [
-            '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
-            '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
-            '«Vinde a mim, todos vós que estais cansados» (Mt 11,28) — <em>Eu vos aliviarei. Tomai sobre vós o meu jugo e aprendei de mim, porque sou manso e humilde de coração.</em>',
-            '«O Espírito vem em auxílio da nossa fraqueza» (Rm 8,26) — <em>Nós não sabemos orar como convém, mas o próprio Espírito intercede por nós com gemidos inexprimíveis.</em>',
-        ];
-        document.getElementById('reading-text').innerHTML = readings[Math.floor(Math.random() * readings.length)];
+        loadRandomMeditation();
     }
 
     // ============================================================
@@ -896,13 +904,7 @@
         currentStep = 1;
         updateStepUI();
         resetTimerUI();
-        const readings = [
-            '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
-            '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
-            '«Vinde a mim, todos vós que estais cansados» (Mt 11,28) — <em>Eu vos aliviarei. Tomai sobre vós o meu jugo e aprendei de mim, porque sou manso e humilde de coração.</em>',
-            '«O Espírito vem em auxílio da nossa fraqueza» (Rm 8,26) — <em>Nós não sabemos orar como convém, mas o próprio Espírito intercede por nós com gemidos inexprimíveis.</em>',
-        ];
-        document.getElementById('reading-text').innerHTML = readings[Math.floor(Math.random() * readings.length)];
+        loadRandomMeditation();
     }
 
     // ============================================================
@@ -956,6 +958,7 @@
     resetTimerUI();
     updateStepUI();
     renderJournal();
+    loadRandomMeditation();  // <-- Carrega a primeira meditação
 
     document.querySelector('.timer-controls .selected')?.click();
 
