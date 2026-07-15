@@ -6,84 +6,76 @@
     <title>Meditação Cristã Autêntica</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; color: #333; line-height: 1.6; }
-        header { background: #2c3e50; color: white; padding: 25px; text-align: center; border-radius: 8px; }
+        header { background: #2c3e50; color: white; padding: 30px; text-align: center; border-radius: 8px; }
         nav { margin: 20px 0; text-align: center; }
-        button { padding: 12px 20px; margin: 6px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button { padding: 12px 20px; margin: 6px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
         button:hover { background: #2980b9; }
-        .section { display: none; background: white; padding: 25px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { display: none; background: white; padding: 25px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 900px; margin-left: auto; margin-right: auto; }
         .active { display: block; }
+        .document-text { max-height: 70vh; overflow-y: auto; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
     </style>
 </head>
 <body>
     <header>
         <h1>Meditação Cristã Autêntica</h1>
-        <p>Baseado na Carta de 1989</p>
+        <p>Carta da Congregação para a Doutrina da Fé (15 de outubro de 1989)</p>
     </header>
 
     <nav>
         <button onclick="showSection('home')">Início</button>
-        <button onclick="showSection('document')">Documento</button>
-        <button onclick="showSection('meditations')">Meditações</button>
-        <button onclick="showSection('journal')">Diário</button>
+        <button onclick="showSection('document')">Carta Completa</button>
+        <button onclick="showSection('meditations')">Meditações Diárias</button>
+        <button onclick="showSection('journal')">Diário Espiritual</button>
     </nav>
 
     <div id="home" class="section active">
         <h2>Bem-vindo</h2>
-        <p>App para meditação cristã fiel ao Magistério.</p>
+        <p>Esta aplicação ajuda você a aprofundar na meditação cristã segundo o Magistério da Igreja.</p>
     </div>
 
     <div id="document" class="section">
-        <h2>Seções da Carta</h2>
-        <div id="sections-list"></div>
-        <div id="content"></div>
+        <h2>Carta Completa</h2>
+        <div class="document-text">
+            <h3>Aos Bispos da Igreja Católica acerca de alguns aspectos da meditação cristã</h3>
+            <p><strong>Introdução</strong><br>
+            Em muitos cristãos do nosso tempo manifesta-se vivo o desejo de aprender a orar de modo autêntico e profundo...</p>
+            <p>(Aqui vai o texto integral - vou adicionar completo na próxima etapa)</p>
+            <!-- O texto completo será inserido aqui -->
+        </div>
     </div>
 
     <div id="meditations" class="section">
-        <h2>Meditação do Dia</h2>
-        <p id="daily-prompt"></p>
+        <h2>Meditações Diárias</h2>
+        <p id="daily-prompt" style="font-size:18px;"></p>
         <button onclick="newMeditation()">Nova Meditação</button>
     </div>
 
     <div id="journal" class="section">
         <h2>Diário Espiritual</h2>
-        <textarea id="journal-entry" rows="8" placeholder="O que Deus falou hoje..."></textarea><br><br>
-        <button onclick="saveJournal()">Salvar</button>
+        <textarea id="journal-entry" rows="10" style="width:100%" placeholder="O que o Senhor falou ao seu coração?"></textarea><br><br>
+        <button onclick="saveJournal()">Salvar Entrada</button>
         <div id="journal-entries"></div>
     </div>
 
     <script>
-        const sections = [
-            {title: "Introdução", text: "Desejo de oração autêntica no mundo moderno."},
-            {title: "Oração Cristã", text: "Diálogo com o Deus Trino através de Cristo."},
-            {title: "Modos Errôneos", text: "Cuidados com sincretismo e técnicas orientais."},
-            {title: "Via de Cristo", text: "Cristo é a única Caminho."}
-        ];
-
-        function populateSections() {
-            const list = document.getElementById('sections-list');
-            sections.forEach(s => {
-                const b = document.createElement('button');
-                b.textContent = s.title;
-                b.onclick = () => document.getElementById('content').innerHTML = `<h3>${s.title}</h3><p>${s.text}</p>`;
-                list.appendChild(b);
-            });
-        }
-
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
         function newMeditation() {
-            const p = ["Pai Nosso", "Eu sou a Via", "Espírito Santo", "Salmos"];
-            document.getElementById('daily-prompt').textContent = p[Math.floor(Math.random()*p.length)];
+            const prompts = [
+                "Reflita no Pai Nosso como modelo perfeito de oração.",
+                "Contemple Jesus: 'Eu sou a Via, a Verdade e a Vida'.",
+                "Peça ao Espírito Santo luz para a sua oração."
+            ];
+            document.getElementById('daily-prompt').textContent = prompts[Math.floor(Math.random() * prompts.length)];
         }
 
         function saveJournal() {
-            alert("Entrada salva! (versão demo)");
+            alert("Entrada salva (demo)");
         }
 
-        populateSections();
         newMeditation();
     </script>
 </body>
