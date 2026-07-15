@@ -231,6 +231,7 @@
             flex-wrap: wrap;
             gap: 12px;
             align-items: center;
+            justify-content: center;
             margin: 20px 0 10px;
         }
 
@@ -254,14 +255,125 @@
             color: #fff;
         }
 
-        .timer-display {
-            font-size: 48px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            color: #2c3e50;
+        /* ===== TIMER ANALÓGICO ===== */
+        .analog-clock {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 15px auto 20px;
+            border-radius: 50%;
+            background: #fcf9f6;
+            border: 6px solid #d4c5b2;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        .clock-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: #b8a48c;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        .clock-hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px;
+            transition: none;
+        }
+
+        .clock-hand.minute {
+            width: 3px;
+            height: 60px;
+            background: #4a5b66;
+            margin-left: -1.5px;
+            z-index: 3;
+        }
+
+        .clock-hand.second {
+            width: 2px;
+            height: 70px;
+            background: #c0392b;
+            margin-left: -1px;
+            z-index: 4;
+        }
+
+        .clock-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .clock-markers .marker {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            transform-origin: bottom center;
+        }
+
+        .clock-markers .marker::before {
+            content: '';
+            display: block;
+            width: 2px;
+            height: 10px;
+            background: #b8a48c;
+            margin: 0 auto;
+            margin-top: 4px;
+        }
+
+        .clock-markers .marker.major::before {
+            height: 16px;
+            width: 3px;
+            background: #4a5b66;
+        }
+
+        .clock-numbers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            font-size: 14px;
+            color: #4a5b66;
+            font-family: 'Georgia', serif;
+        }
+
+        .clock-numbers .num {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%);
+            padding-top: 12px;
+            font-size: 14px;
+            font-weight: 400;
+            color: #4a5b66;
+        }
+
+        .timer-display-text {
             text-align: center;
-            padding: 20px 0;
-            font-variant-numeric: tabular-nums;
+            font-size: 20px;
+            color: #4a5b66;
+            margin: 5px 0 10px;
+            font-family: 'Georgia', serif;
+            letter-spacing: 1px;
+        }
+
+        .timer-display-text .time-left {
+            font-weight: 600;
+            color: #2c3e50;
         }
 
         .reflection-box {
@@ -387,8 +499,17 @@
                 padding: 20px 18px;
             }
 
-            .timer-display {
-                font-size: 36px;
+            .analog-clock {
+                width: 150px;
+                height: 150px;
+            }
+
+            .clock-hand.minute {
+                height: 48px;
+            }
+
+            .clock-hand.second {
+                height: 58px;
             }
 
             .meditation-text {
@@ -417,7 +538,7 @@
 
     <header>
         <h1>Meditação Cristã <span>autêntica</span></h1>
-        <p>Carta da Congregação para a Doutrina da Fé • 15 out 1989</p>
+        <p>Cf. Carta da Congregação para a Doutrina da Fé • 15 out 1989</p>
     </header>
 
     <nav>
@@ -479,7 +600,20 @@
                     <button data-time="10">10 min</button>
                     <button data-time="15">15 min</button>
                 </div>
-                <div class="timer-display" id="timer-display">05:00</div>
+
+                <!-- Timer analógico -->
+                <div class="analog-clock" id="analogClock">
+                    <div class="clock-markers" id="clockMarkers"></div>
+                    <div class="clock-numbers" id="clockNumbers"></div>
+                    <div class="clock-hand minute" id="minuteHand"></div>
+                    <div class="clock-hand second" id="secondHand"></div>
+                    <div class="clock-center"></div>
+                </div>
+
+                <div class="timer-display-text">
+                    Tempo restante: <span class="time-left" id="timerDisplay">05:00</span>
+                </div>
+
                 <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
                     <button class="btn-primary" id="start-timer-btn">▶ Iniciar silêncio</button>
                     <button class="btn-secondary" id="reset-timer-btn">⟲ Reiniciar</button>
@@ -581,91 +715,71 @@
     });
 
     // ============================================================
-    //  MEDITAÇÃO GUIADA - PASSOS
+    //  TIMER ANALÓGICO - CONSTRUÇÃO
     // ============================================================
-    let currentStep = 1;
-    const totalSteps = 4;
-    const steps = document.querySelectorAll('.step');
-    const dots = document.querySelectorAll('.dot');
-    const stepLabel = document.getElementById('step-label');
+    function buildClock() {
+        const markersContainer = document.getElementById('clockMarkers');
+        const numbersContainer = document.getElementById('clockNumbers');
 
-    function updateStepUI() {
-        steps.forEach(s => s.classList.remove('active-step'));
-        document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active-step');
-        dots.forEach(d => d.classList.remove('active-dot'));
-        document.querySelector(`.dot[data-step="${currentStep}"]`).classList.add('active-dot');
-        stepLabel.textContent = `Passo ${currentStep} de ${totalSteps}`;
+        // Limpa os containers
+        markersContainer.innerHTML = '';
+        numbersContainer.innerHTML = '';
 
-        // Esconde botão "Próximo" no passo 2 (timer) a menos que o timer tenha terminado
-        if (currentStep === 2) {
-            document.getElementById('next-after-timer').style.display = 'none';
+        // Marcadores (60)
+        for (let i = 0; i < 60; i++) {
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            if (i % 5 === 0) marker.classList.add('major');
+            const angle = i * 6;
+            marker.style.transform = `rotate(${angle}deg)`;
+            markersContainer.appendChild(marker);
+        }
+
+        // Números (12)
+        for (let i = 1; i <= 12; i++) {
+            const num = document.createElement('div');
+            num.className = 'num';
+            const angle = i * 30;
+            const radius = 65;
+            const radians = (angle - 90) * Math.PI / 180;
+            const x = 50 + (radius / 100) * 50 * Math.cos(radians);
+            const y = 50 + (radius / 100) * 50 * Math.sin(radians);
+            num.style.left = x + '%';
+            num.style.top = y + '%';
+            num.style.transform = 'translate(-50%, -50%)';
+            num.textContent = i;
+            numbersContainer.appendChild(num);
         }
     }
 
-    function nextStep() {
-        if (currentStep < totalSteps) {
-            currentStep++;
-            updateStepUI();
-            // Se entrou no passo 2, reseta o timer
-            if (currentStep === 2) {
-                resetTimerUI();
-            }
-            // Se entrou no passo 3, preenche com a reflexão do passo anterior (se houver)
-            if (currentStep === 3) {
-                const ref = document.getElementById('reflection-text');
-                // não sobrescreve se já tiver algo
-            }
-        }
-    }
-
-    function resetMeditation() {
-        currentStep = 1;
-        updateStepUI();
-        document.getElementById('reflection-text').value = '';
-        document.getElementById('bell-message').textContent = '';
-        resetTimerUI();
-        // Muda a leitura para um texto diferente a cada reinício
-        const readings = [
-            '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
-            '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
-            '«Vinde a mim, todos vós que estais cansados» (Mt 11,28) — <em>Eu vos aliviarei. Tomai sobre vós o meu jugo e aprendei de mim, porque sou manso e humilde de coração.</em>',
-            '«O Espírito vem em auxílio da nossa fraqueza» (Rm 8,26) — <em>Nós não sabemos orar como convém, mas o próprio Espírito intercede por nós com gemidos inexprimíveis.</em>',
-        ];
-        document.getElementById('reading-text').innerHTML = readings[Math.floor(Math.random() * readings.length)];
-    }
-
     // ============================================================
-    //  TIMER
+    //  TIMER ANALÓGICO - LÓGICA
     // ============================================================
-    let timerSeconds = 300; // 5 min padrão
+    let timerSeconds = 300;
     let timerInterval = null;
     let timerRunning = false;
     let timerFinished = false;
+    let totalSeconds = 300;
 
-    const timerDisplay = document.getElementById('timer-display');
+    const minuteHand = document.getElementById('minuteHand');
+    const secondHand = document.getElementById('secondHand');
+    const timerDisplay = document.getElementById('timerDisplay');
     const startBtn = document.getElementById('start-timer-btn');
     const resetBtn = document.getElementById('reset-timer-btn');
     const bellMsg = document.getElementById('bell-message');
     const nextAfterTimer = document.getElementById('next-after-timer');
 
-    // Seleção de tempo
-    document.querySelectorAll('.timer-controls button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (timerRunning) return;
-            document.querySelectorAll('.timer-controls button').forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
-            const mins = parseInt(this.dataset.time);
-            timerSeconds = mins * 60;
-            updateTimerDisplay();
-            timerFinished = false;
-            bellMsg.textContent = '';
-            nextAfterTimer.style.display = 'none';
-        });
-    });
+    function updateClock(seconds) {
+        const total = totalSeconds;
+        const elapsed = total - seconds;
+        const minuteAngle = (elapsed / total) * 360;
+        const secondAngle = ((elapsed % 60) / 60) * 360;
 
-    function updateTimerDisplay() {
-        const mins = Math.floor(timerSeconds / 60);
-        const secs = timerSeconds % 60;
+        minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
+        secondHand.style.transform = `rotate(${secondAngle}deg)`;
+
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
         timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
@@ -679,19 +793,38 @@
         const selected = document.querySelector('.timer-controls .selected');
         if (selected) {
             timerSeconds = parseInt(selected.dataset.time) * 60;
+            totalSeconds = timerSeconds;
         } else {
             timerSeconds = 300;
+            totalSeconds = 300;
         }
-        updateTimerDisplay();
+        updateClock(timerSeconds);
         bellMsg.textContent = '';
         nextAfterTimer.style.display = 'none';
         startBtn.textContent = '▶ Iniciar silêncio';
     }
 
+    // ============================================================
+    //  TIMER - CONTROLES
+    // ============================================================
+    document.querySelectorAll('.timer-controls button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (timerRunning) return;
+            document.querySelectorAll('.timer-controls button').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            const mins = parseInt(this.dataset.time);
+            timerSeconds = mins * 60;
+            totalSeconds = timerSeconds;
+            updateClock(timerSeconds);
+            timerFinished = false;
+            bellMsg.textContent = '';
+            nextAfterTimer.style.display = 'none';
+        });
+    });
+
     startBtn.addEventListener('click', function() {
         if (timerRunning) return;
         if (timerFinished) {
-            // Se já terminou, reinicia
             resetTimerUI();
             timerRunning = true;
             this.textContent = '⏳ Em andamento...';
@@ -716,9 +849,7 @@
                 timerRunning = false;
                 timerFinished = true;
                 startBtn.textContent = '🔔 Recomeçar';
-                // Toque do sino (simulado com mensagem e beep)
                 bellMsg.textContent = '🔔 SINOOOO! O silêncio terminou.';
-                // Tenta emitir som (se o navegador permitir)
                 try {
                     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const oscillator = audioCtx.createOscillator();
@@ -730,14 +861,58 @@
                     gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
                     oscillator.start();
                     oscillator.stop(audioCtx.currentTime + 0.6);
-                } catch (e) { /* fallback silencioso */ }
-                // Mostra botão "Prosseguir"
+                } catch (e) { /* fallback */ }
                 nextAfterTimer.style.display = 'inline-block';
                 return;
             }
             timerSeconds--;
-            updateTimerDisplay();
+            updateClock(timerSeconds);
         }, 1000);
+    }
+
+    // ============================================================
+    //  MEDITAÇÃO GUIADA - PASSOS
+    // ============================================================
+    let currentStep = 1;
+    const totalSteps = 4;
+    const steps = document.querySelectorAll('.step');
+    const dots = document.querySelectorAll('.dot');
+    const stepLabel = document.getElementById('step-label');
+
+    function updateStepUI() {
+        steps.forEach(s => s.classList.remove('active-step'));
+        document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active-step');
+        dots.forEach(d => d.classList.remove('active-dot'));
+        document.querySelector(`.dot[data-step="${currentStep}"]`).classList.add('active-dot');
+        stepLabel.textContent = `Passo ${currentStep} de ${totalSteps}`;
+        if (currentStep === 2) {
+            document.getElementById('next-after-timer').style.display = 'none';
+        }
+    }
+
+    function nextStep() {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            updateStepUI();
+            if (currentStep === 2) {
+                resetTimerUI();
+            }
+        }
+    }
+
+    function resetMeditation() {
+        currentStep = 1;
+        updateStepUI();
+        document.getElementById('reflection-text').value = '';
+        document.getElementById('bell-message').textContent = '';
+        resetTimerUI();
+        const readings = [
+            '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
+            '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
+            '«Vinde a mim, todos vós que estais cansados» (Mt 11,28) — <em>Eu vos aliviarei. Tomai sobre vós o meu jugo e aprendei de mim, porque sou manso e humilde de coração.</em>',
+            '«O Espírito vem em auxílio da nossa fraqueza» (Rm 8,26) — <em>Nós não sabemos orar como convém, mas o próprio Espírito intercede por nós com gemidos inexprimíveis.</em>',
+        ];
+        document.getElementById('reading-text').innerHTML = readings[Math.floor(Math.random() * readings.length)];
     }
 
     // ============================================================
@@ -752,11 +927,9 @@
         saveEntry(text);
         document.getElementById('reflection-text').value = '';
         alert('✅ Reflexão salva no Diário Espiritual!');
-        // Volta para o passo 1
         currentStep = 1;
         updateStepUI();
         resetTimerUI();
-        // Muda leitura
         const readings = [
             '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
             '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
@@ -813,13 +986,13 @@
     // ============================================================
     //  INICIALIZAÇÃO
     // ============================================================
+    buildClock();
+    resetTimerUI();
     updateStepUI();
     renderJournal();
 
-    // Garantir que o timer comece com 5 min
     document.querySelector('.timer-controls .selected')?.click();
 
-    // Ajuste para o botão "Prosseguir" no timer
     document.getElementById('next-after-timer').addEventListener('click', function() {
         if (currentStep === 2) {
             nextStep();
