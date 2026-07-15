@@ -5,109 +5,826 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meditação Cristã Autêntica</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; color: #333; line-height: 1.7; }
-        header { background: #2c3e50; color: white; padding: 30px; text-align: center; border-radius: 8px; }
-        nav { margin: 20px 0; text-align: center; }
-        button { padding: 12px 20px; margin: 6px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #2980b9; }
-        .section { display: none; background: white; padding: 25px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 900px; margin-left: auto; margin-right: auto; }
-        .active { display: block; }
-        .document-text { max-height: 70vh; overflow-y: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
-        details { margin: 15px 0; }
-        summary { font-weight: bold; padding: 10px; background: #ecf0f1; border-radius: 5px; cursor: pointer; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #f7f3ee;
+            color: #2c3e50;
+            line-height: 1.8;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app {
+            max-width: 820px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 35px 45px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.07);
+            margin: 10px auto;
+        }
+
+        header {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #eee7e0;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: #2c3e50;
+        }
+
+        header h1 span {
+            display: inline-block;
+            background: #d4c5b2;
+            color: #fff;
+            font-size: 14px;
+            padding: 2px 14px;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            margin-left: 6px;
+            font-weight: 300;
+        }
+
+        header p {
+            font-size: 15px;
+            color: #7f8c8d;
+            margin-top: 8px;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        nav button {
+            background: transparent;
+            border: 1px solid #d4c5b2;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            color: #4a5b66;
+            cursor: pointer;
+            transition: all 0.25s;
+            flex: 1 0 auto;
+            max-width: 170px;
+        }
+
+        nav button:hover,
+        nav button.active-tab {
+            background: #d4c5b2;
+            color: #fff;
+            border-color: #d4c5b2;
+        }
+
+        .section {
+            display: none;
+            animation: fade 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 400;
+            color: #2c3e50;
+            margin-bottom: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .card {
+            background: #fcf9f6;
+            border-radius: 16px;
+            padding: 28px 30px;
+            border: 1px solid #f0e8e0;
+            margin-bottom: 20px;
+        }
+
+        /* ===== HOME ===== */
+        #home .card p {
+            font-size: 17px;
+            color: #3d4e5a;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e8e0d8;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            color: #4a5b66;
+            margin-top: 12px;
+        }
+
+        /* ===== MEDITAÇÃO GUIADA ===== */
+        .step {
+            display: none;
+            animation: fade 0.25s ease;
+        }
+
+        .step.active-step {
+            display: block;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #a99b8c;
+            letter-spacing: 0.3px;
+        }
+
+        .step-indicator .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd6ce;
+            margin: 0 4px;
+            transition: 0.3s;
+        }
+
+        .step-indicator .dot.active-dot {
+            background: #b8a48c;
+            transform: scale(1.2);
+        }
+
+        .meditation-text {
+            font-size: 18px;
+            font-style: italic;
+            color: #3d4e5a;
+            padding: 10px 0 15px;
+            border-left: 4px solid #d4c5b2;
+            padding-left: 22px;
+            margin: 10px 0 18px;
+        }
+
+        .meditation-text strong {
+            font-style: normal;
+            color: #2c3e50;
+        }
+
+        .btn-primary {
+            background: #b8a48c;
+            border: none;
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 60px;
+            font-size: 17px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: #a18d78;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #d4c5b2;
+            color: #4a5b66;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: #f0e8e0;
+        }
+
+        .timer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 20px 0 10px;
+        }
+
+        .timer-controls button {
+            background: #f0e8e0;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .timer-controls button:hover {
+            background: #e0d5ca;
+        }
+
+        .timer-controls .selected {
+            background: #b8a48c;
+            color: #fff;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #2c3e50;
+            text-align: center;
+            padding: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .reflection-box {
+            background: #f4eee8;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 18px 0 10px;
+        }
+
+        .reflection-box textarea {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            color: #2c3e50;
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+            border-bottom: 1px dashed #d4c5b2;
+            padding: 6px 0;
+        }
+
+        .reflection-box textarea::placeholder {
+            color: #b0a394;
+            font-style: italic;
+        }
+
+        /* ===== DIÁRIO ===== */
+        #journal-entries {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .entry-item {
+            background: #fcf9f6;
+            border-left: 4px solid #d4c5b2;
+            padding: 14px 20px;
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 15px;
+        }
+
+        .entry-item small {
+            display: block;
+            color: #a99b8c;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .entry-item .delete-entry {
+            background: none;
+            border: none;
+            color: #c0392b;
+            font-size: 14px;
+            cursor: pointer;
+            float: right;
+            opacity: 0.5;
+        }
+
+        .entry-item .delete-entry:hover {
+            opacity: 1;
+        }
+
+        .empty-journal {
+            color: #a99b8c;
+            font-style: italic;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        /* ===== CARTA ===== */
+        .document-text details {
+            margin: 10px 0;
+            border-bottom: 1px solid #f0e8e0;
+            padding-bottom: 10px;
+        }
+
+        .document-text summary {
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 0;
+            color: #3d4e5a;
+        }
+
+        .document-text summary:hover {
+            color: #b8a48c;
+        }
+
+        .document-text p {
+            padding: 8px 0 4px 18px;
+            color: #4a5b66;
+            font-size: 16px;
+        }
+
+        .vatican-link {
+            display: inline-block;
+            margin: 25px 0 5px;
+            color: #b8a48c;
+            text-decoration: none;
+            border-bottom: 1px solid #d4c5b2;
+            padding-bottom: 2px;
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 600px) {
+            .app {
+                padding: 18px 16px 30px;
+            }
+
+            header h1 {
+                font-size: 21px;
+            }
+
+            nav button {
+                font-size: 13px;
+                padding: 8px 14px;
+                max-width: 140px;
+            }
+
+            .card {
+                padding: 20px 18px;
+            }
+
+            .timer-display {
+                font-size: 36px;
+            }
+
+            .meditation-text {
+                font-size: 16px;
+            }
+
+            .btn-primary {
+                width: 100%;
+                text-align: center;
+            }
+
+            .timer-controls {
+                justify-content: center;
+            }
+        }
+
+        /* ===== UTILITÁRIOS ===== */
+        .mt-10 { margin-top: 10px; }
+        .mt-20 { margin-top: 20px; }
+        .text-center { text-align: center; }
+        .text-muted { color: #a99b8c; font-size: 14px; }
     </style>
 </head>
 <body>
+<div class="app">
+
     <header>
-        <h1>Meditação Cristã Autêntica</h1>
-        <p>Carta da Congregação para a Doutrina da Fé • 15 de outubro de 1989</p>
+        <h1>Meditação Cristã <span>autêntica</span></h1>
+        <p>Carta da Congregação para a Doutrina da Fé • 15 out 1989</p>
     </header>
 
     <nav>
-        <button onclick="showSection('home')">Início</button>
-        <button onclick="showSection('document')">Carta Completa</button>
-        <button onclick="showSection('meditations')">Meditações Diárias</button>
-        <button onclick="showSection('journal')">Diário Espiritual</button>
+        <button class="active-tab" data-tab="home">Início</button>
+        <button data-tab="guided">Meditação Guiada</button>
+        <button data-tab="document">Carta</button>
+        <button data-tab="journal">Diário</button>
     </nav>
 
+    <!-- ==================== HOME ==================== -->
     <div id="home" class="section active">
-        <h2>Bem-vindo</h2>
-        <p>Esta aplicação ajuda você a praticar a meditação cristã fiel ao Magistério da Igreja.</p>
-    </div>
-
-    <div id="document" class="section">
-        <h2>Carta Completa - Seções Expansíveis</h2>
-        <div class="document-text">
-            
-            <details open>
-                <summary>I. Introdução</summary>
-                <p>Em muitos cristãos manifesta-se o desejo de aprender a orar de modo autêntico...</p>
-            </details>
-
-            <details>
-                <summary>II. A Oração Cristã à Luz da Revelação</summary>
-                <p>A oração cristã é diálogo pessoal com o Deus Trino, fundamentada na Sagrada Escritura.</p>
-            </details>
-
-            <details>
-                <summary>III. Modos Errôneos de Orar</summary>
-                <p>Cuidados com pseudo-gnose, messalianismo e sincretismo com técnicas orientais.</p>
-            </details>
-
-            <details>
-                <summary>IV. A Via Cristã da União com Deus</summary>
-                <p>Cristo é a única Via. A verdadeira união respeita a alteridade criatura-Criador.</p>
-            </details>
-
-            <p style="margin-top:30px; text-align:center;">
-                <strong>📖 Ler o documento oficial completo:</strong><br>
-                <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_19891015_meditazione-cristiana_po.html" target="_blank" style="color:#2980b9;">
-                    Acessar site do Vaticano
-                </a>
+        <div class="card">
+            <h2>☦️ Bem-vindo</h2>
+            <p>Esta aplicação foi criada para ajudar você a praticar a <strong>meditação cristã</strong> em fidelidade ao Magistério da Igreja, transformando a leitura da carta em uma <strong>experiência de oração</strong>.</p>
+            <p style="margin-top:12px;">Comece pela <strong>Meditação Guiada</strong> ou explore a carta e o diário espiritual.</p>
+            <span class="badge">📖 "Cristo é a única Via"</span>
+        </div>
+        <div class="card" style="background:#f4eee8;">
+            <p style="font-size:15px; color:#4a5b66;">
+                <strong>💡 Dica:</strong> Reserve um momento tranquilo, sem pressa. A meditação é um encontro pessoal com Deus.
             </p>
         </div>
     </div>
 
-    <div id="meditations" class="section">
-        <h2>Meditações Diárias</h2>
-        <p id="daily-prompt" style="font-size:18px; min-height:120px; background:#f9f9f9; padding:15px; border-radius:5px;"></p>
-        <button onclick="newMeditation()">Nova Meditação</button>
+    <!-- ==================== MEDITAÇÃO GUIADA ==================== -->
+    <div id="guided" class="section">
+        <h2>🕊️ Meditação Guiada</h2>
+
+        <!-- Indicador de passos -->
+        <div class="step-indicator">
+            <span id="step-label">Passo 1 de 4</span>
+            <span>
+                <span class="dot active-dot" data-step="1"></span>
+                <span class="dot" data-step="2"></span>
+                <span class="dot" data-step="3"></span>
+                <span class="dot" data-step="4"></span>
+            </span>
+        </div>
+
+        <!-- PASSO 1: Leitura -->
+        <div class="step active-step" data-step="1">
+            <div class="card">
+                <h3 style="font-weight:400;">📖 Leitura</h3>
+                <p style="color:#4a5b66;">Leia lentamente este trecho, deixando que cada palavra ecoe no coração.</p>
+                <div class="meditation-text" id="reading-text">
+                    <strong>«O Pai-Nosso»</strong> — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>
+                </div>
+                <button class="btn-primary" onclick="nextStep()">Prosseguir →</button>
+            </div>
+        </div>
+
+        <!-- PASSO 2: Silêncio / Timer -->
+        <div class="step" data-step="2">
+            <div class="card">
+                <h3 style="font-weight:400;">🔇 Silêncio</h3>
+                <p style="color:#4a5b66;">Entre em silêncio. Permaneça na presença de Deus. Escolha o tempo:</p>
+                <div class="timer-controls">
+                    <button class="selected" data-time="5">5 min</button>
+                    <button data-time="10">10 min</button>
+                    <button data-time="15">15 min</button>
+                </div>
+                <div class="timer-display" id="timer-display">05:00</div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                    <button class="btn-primary" id="start-timer-btn">▶ Iniciar silêncio</button>
+                    <button class="btn-secondary" id="reset-timer-btn">⟲ Reiniciar</button>
+                </div>
+                <div id="bell-message" style="margin-top:16px; font-size:18px; color:#b8a48c; min-height:30px;"></div>
+                <button class="btn-primary mt-20" onclick="nextStep()" style="display:none;" id="next-after-timer">Prosseguir →</button>
+            </div>
+        </div>
+
+        <!-- PASSO 3: Reflexão -->
+        <div class="step" data-step="3">
+            <div class="card">
+                <h3 style="font-weight:400;">✍️ Reflexão</h3>
+                <p style="color:#4a5b66;">O que o Senhor falou ao seu coração? Escreva livremente:</p>
+                <div class="reflection-box">
+                    <textarea id="reflection-text" placeholder="Escreva aqui o que brotou do silêncio..."></textarea>
+                </div>
+                <button class="btn-primary" onclick="nextStep()">Prosseguir →</button>
+            </div>
+        </div>
+
+        <!-- PASSO 4: Oração final -->
+        <div class="step" data-step="4">
+            <div class="card">
+                <h3 style="font-weight:400;">🙏 Oração final</h3>
+                <div class="meditation-text" style="border-left-color:#b8a48c;">
+                    <strong>Senhor,</strong><br>
+                    ensina-nos a orar. Que o silêncio que guardamos diante de Ti seja fecundo. Que a Tua Palavra habite em nós e nos transforme. Amém.
+                </div>
+                <p style="color:#4a5b66; margin-top:10px;">Que a paz de Cristo esteja com você.</p>
+                <button class="btn-secondary" onclick="resetMeditation()">🔄 Recomeçar meditação</button>
+                <button class="btn-primary mt-10" onclick="saveReflectionAndFinish()">💾 Salvar reflexão no Diário</button>
+            </div>
+        </div>
+
     </div>
 
+    <!-- ==================== CARTA ==================== -->
+    <div id="document" class="section">
+        <h2>📜 Carta da Congregação</h2>
+        <div class="card document-text">
+            <details open>
+                <summary>I. Introdução</summary>
+                <p>Em muitos cristãos manifesta-se o desejo de aprender a orar de modo autêntico, superando uma oração puramente vocal ou ritual. A Igreja, guiada pelo Espírito Santo, oferece os caminhos seguros da tradição.</p>
+            </details>
+            <details>
+                <summary>II. A Oração Cristã à Luz da Revelação</summary>
+                <p>A oração cristã é diálogo pessoal com o Deus Trino, fundamentada na Sagrada Escritura. Não é uma técnica, mas uma relação viva com o Pai, por Cristo, no Espírito.</p>
+            </details>
+            <details>
+                <summary>III. Modos Errôneos de Orar</summary>
+                <p>Cuidados com pseudo-gnose, messalianismo e sincretismo com técnicas orientais. A oração cristã não busca o vazio ou a autossuficiência, mas o encontro com o Deus pessoal.</p>
+            </details>
+            <details>
+                <summary>IV. A Via Cristã da União com Deus</summary>
+                <p>Cristo é a única Via. A verdadeira união respeita a alteridade criatura-Criador. A contemplação cristã é dom e graça, não conquista humana.</p>
+            </details>
+            <div style="margin-top:25px; text-align:center;">
+                <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_19891015_meditazione-cristiana_po.html" target="_blank" class="vatican-link">
+                    📖 Ler documento oficial no site do Vaticano →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DIÁRIO ==================== -->
     <div id="journal" class="section">
-        <h2>Diário Espiritual</h2>
-        <textarea id="journal-entry" rows="10" style="width:100%" placeholder="Escreva aqui o que o Senhor falou ao seu coração..."></textarea><br><br>
-        <button onclick="saveJournal()">Salvar Entrada</button>
-        <div id="journal-entries"></div>
+        <h2>📓 Diário Espiritual</h2>
+        <div class="card">
+            <p style="color:#4a5b66;">Aqui ficam registradas as suas reflexões durante a meditação.</p>
+            <div id="journal-entries">
+                <!-- Renderizado via JS -->
+            </div>
+        </div>
     </div>
 
-    <script>
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+</div>
 
-        function newMeditation() {
-            const prompts = [
-                "Leia lentamente o Pai Nosso e medite em cada palavra.",
-                "Contemple Jesus: 'Eu sou a Via, a Verdade e a Vida' (Jo 14,6).",
-                "Peça ao Espírito Santo que ensine você a rezar.",
-                "Escolha um Salmo e faça dele sua oração pessoal."
-            ];
-            document.getElementById('daily-prompt').textContent = prompts[Math.floor(Math.random() * prompts.length)];
-        }
+<script>
+    // ============================================================
+    //  NAVEGAÇÃO
+    // ============================================================
+    const tabs = document.querySelectorAll('[data-tab]');
+    const sections = {
+        home: document.getElementById('home'),
+        guided: document.getElementById('guided'),
+        document: document.getElementById('document'),
+        journal: document.getElementById('journal'),
+    };
 
-        function saveJournal() {
-            const text = document.getElementById('journal-entry').value.trim();
-            if (text) {
-                alert("✅ Entrada salva!");
-                document.getElementById('journal-entry').value = '';
-            } else {
-                alert("Escreva algo antes de salvar.");
+    tabs.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tabs.forEach(b => b.classList.remove('active-tab'));
+            this.classList.add('active-tab');
+            const id = this.dataset.tab;
+            Object.values(sections).forEach(s => s.classList.remove('active'));
+            sections[id].classList.add('active');
+        });
+    });
+
+    // ============================================================
+    //  MEDITAÇÃO GUIADA - PASSOS
+    // ============================================================
+    let currentStep = 1;
+    const totalSteps = 4;
+    const steps = document.querySelectorAll('.step');
+    const dots = document.querySelectorAll('.dot');
+    const stepLabel = document.getElementById('step-label');
+
+    function updateStepUI() {
+        steps.forEach(s => s.classList.remove('active-step'));
+        document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active-step');
+        dots.forEach(d => d.classList.remove('active-dot'));
+        document.querySelector(`.dot[data-step="${currentStep}"]`).classList.add('active-dot');
+        stepLabel.textContent = `Passo ${currentStep} de ${totalSteps}`;
+
+        // Esconde botão "Próximo" no passo 2 (timer) a menos que o timer tenha terminado
+        if (currentStep === 2) {
+            document.getElementById('next-after-timer').style.display = 'none';
+        }
+    }
+
+    function nextStep() {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            updateStepUI();
+            // Se entrou no passo 2, reseta o timer
+            if (currentStep === 2) {
+                resetTimerUI();
+            }
+            // Se entrou no passo 3, preenche com a reflexão do passo anterior (se houver)
+            if (currentStep === 3) {
+                const ref = document.getElementById('reflection-text');
+                // não sobrescreve se já tiver algo
             }
         }
+    }
 
-        newMeditation();
-    </script>
+    function resetMeditation() {
+        currentStep = 1;
+        updateStepUI();
+        document.getElementById('reflection-text').value = '';
+        document.getElementById('bell-message').textContent = '';
+        resetTimerUI();
+        // Muda a leitura para um texto diferente a cada reinício
+        const readings = [
+            '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
+            '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
+            '«Vinde a mim, todos vós que estais cansados» (Mt 11,28) — <em>Eu vos aliviarei. Tomai sobre vós o meu jugo e aprendei de mim, porque sou manso e humilde de coração.</em>',
+            '«O Espírito vem em auxílio da nossa fraqueza» (Rm 8,26) — <em>Nós não sabemos orar como convém, mas o próprio Espírito intercede por nós com gemidos inexprimíveis.</em>',
+        ];
+        document.getElementById('reading-text').innerHTML = readings[Math.floor(Math.random() * readings.length)];
+    }
+
+    // ============================================================
+    //  TIMER
+    // ============================================================
+    let timerSeconds = 300; // 5 min padrão
+    let timerInterval = null;
+    let timerRunning = false;
+    let timerFinished = false;
+
+    const timerDisplay = document.getElementById('timer-display');
+    const startBtn = document.getElementById('start-timer-btn');
+    const resetBtn = document.getElementById('reset-timer-btn');
+    const bellMsg = document.getElementById('bell-message');
+    const nextAfterTimer = document.getElementById('next-after-timer');
+
+    // Seleção de tempo
+    document.querySelectorAll('.timer-controls button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (timerRunning) return;
+            document.querySelectorAll('.timer-controls button').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            const mins = parseInt(this.dataset.time);
+            timerSeconds = mins * 60;
+            updateTimerDisplay();
+            timerFinished = false;
+            bellMsg.textContent = '';
+            nextAfterTimer.style.display = 'none';
+        });
+    });
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function resetTimerUI() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        timerRunning = false;
+        timerFinished = false;
+        const selected = document.querySelector('.timer-controls .selected');
+        if (selected) {
+            timerSeconds = parseInt(selected.dataset.time) * 60;
+        } else {
+            timerSeconds = 300;
+        }
+        updateTimerDisplay();
+        bellMsg.textContent = '';
+        nextAfterTimer.style.display = 'none';
+        startBtn.textContent = '▶ Iniciar silêncio';
+    }
+
+    startBtn.addEventListener('click', function() {
+        if (timerRunning) return;
+        if (timerFinished) {
+            // Se já terminou, reinicia
+            resetTimerUI();
+            timerRunning = true;
+            this.textContent = '⏳ Em andamento...';
+            startCountdown();
+            return;
+        }
+        timerRunning = true;
+        this.textContent = '⏳ Em andamento...';
+        startCountdown();
+    });
+
+    resetBtn.addEventListener('click', function() {
+        resetTimerUI();
+    });
+
+    function startCountdown() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerRunning = false;
+                timerFinished = true;
+                startBtn.textContent = '🔔 Recomeçar';
+                // Toque do sino (simulado com mensagem e beep)
+                bellMsg.textContent = '🔔 SINOOOO! O silêncio terminou.';
+                // Tenta emitir som (se o navegador permitir)
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.frequency.value = 880;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.6);
+                } catch (e) { /* fallback silencioso */ }
+                // Mostra botão "Prosseguir"
+                nextAfterTimer.style.display = 'inline-block';
+                return;
+            }
+            timerSeconds--;
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    // ============================================================
+    //  SALVAR REFLEXÃO NO DIÁRIO
+    // ============================================================
+    function saveReflectionAndFinish() {
+        const text = document.getElementById('reflection-text').value.trim();
+        if (!text) {
+            alert('Escreva algo no campo de reflexão antes de salvar.');
+            return;
+        }
+        saveEntry(text);
+        document.getElementById('reflection-text').value = '';
+        alert('✅ Reflexão salva no Diário Espiritual!');
+        // Volta para o passo 1
+        currentStep = 1;
+        updateStepUI();
+        resetTimerUI();
+        // Muda leitura
+        const readings = [
+            '«O Pai-Nosso» — <em>Pai nosso, que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu...</em>',
+            '«Eu sou a Videira, vós os ramos» (Jo 15,5) — <em>Permanecei em mim, e eu permanecerei em vós. Sem mim, nada podeis fazer.</em>',
+            '«Vinde a mim, todos vós que estais cansados» (Mt 11,28) — <em>Eu vos aliviarei. Tomai sobre vós o meu jugo e aprendei de mim, porque sou manso e humilde de coração.</em>',
+            '«O Espírito vem em auxílio da nossa fraqueza» (Rm 8,26) — <em>Nós não sabemos orar como convém, mas o próprio Espírito intercede por nós com gemidos inexprimíveis.</em>',
+        ];
+        document.getElementById('reading-text').innerHTML = readings[Math.floor(Math.random() * readings.length)];
+    }
+
+    // ============================================================
+    //  DIÁRIO - localStorage
+    // ============================================================
+    function getEntries() {
+        try {
+            return JSON.parse(localStorage.getItem('meditationJournal')) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveEntry(text) {
+        const entries = getEntries();
+        entries.push({
+            date: new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+            text: text
+        });
+        localStorage.setItem('meditationJournal', JSON.stringify(entries));
+        renderJournal();
+    }
+
+    function deleteEntry(index) {
+        const entries = getEntries();
+        entries.splice(index, 1);
+        localStorage.setItem('meditationJournal', JSON.stringify(entries));
+        renderJournal();
+    }
+
+    function renderJournal() {
+        const container = document.getElementById('journal-entries');
+        const entries = getEntries();
+        if (entries.length === 0) {
+            container.innerHTML = `<div class="empty-journal">✍️ Nenhuma entrada ainda. Comece sua meditação!</div>`;
+            return;
+        }
+        container.innerHTML = entries.map((e, i) => `
+            <div class="entry-item">
+                <small>${e.date}</small>
+                <span>${e.text}</span>
+                <button class="delete-entry" onclick="deleteEntry(${i})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    // ============================================================
+    //  INICIALIZAÇÃO
+    // ============================================================
+    updateStepUI();
+    renderJournal();
+
+    // Garantir que o timer comece com 5 min
+    document.querySelector('.timer-controls .selected')?.click();
+
+    // Ajuste para o botão "Prosseguir" no timer
+    document.getElementById('next-after-timer').addEventListener('click', function() {
+        if (currentStep === 2) {
+            nextStep();
+        }
+    });
+</script>
 </body>
 </html>
