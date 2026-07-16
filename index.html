@@ -801,15 +801,19 @@
 //  ============================================================
 function playBell() {
     try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = getAudioContext();
+        if (ctx.state === 'suspended') {
+            ctx.resume(); // Tenta acordar o áudio
+        }
+        
         const sequences = [
-            [880, 660, 880],  // 1ª sequência
-            [880, 660, 880],  // 2ª sequência (1 segundo depois)
-            [880, 660, 880]   // 3ª sequência (2 segundos depois)
+            [880, 660, 880],
+            [880, 660, 880],
+            [880, 660, 880]
         ];
         const durations = [0.15, 0.15, 0.15];
-        const gapBetweenSequences = 1.0; // 1 segundo entre sequências
-        const gapBetweenNotes = 0.2;     // 0.2 segundos entre notas
+        const gapBetweenSequences = 1.0;
+        const gapBetweenNotes = 0.2;
 
         sequences.forEach((freqs, seqIndex) => {
             const seqDelay = seqIndex * (durations.reduce((a, b) => a + b, 0) + gapBetweenSequences);
@@ -817,21 +821,37 @@ function playBell() {
             freqs.forEach((freq, noteIndex) => {
                 const noteDelay = seqDelay + noteIndex * (durations[noteIndex] + gapBetweenNotes);
                 setTimeout(() => {
-                    const oscillator = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
                     oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
+                    gainNode.connect(ctx.destination);
                     oscillator.frequency.value = freq;
                     oscillator.type = 'sine';
-                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
                     oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + durations[noteIndex]);
+                    oscillator.stop(ctx.currentTime + durations[noteIndex]);
                 }, noteDelay * 1000);
             });
         });
     } catch (e) {
-        // Fallback silencioso
+        console.log('🔇 Áudio não disponível:', e.message);
     }
+}
+
+// ============================================================
+//  CONTROLE DE ÁUDIO - DESPERTAR
+// ============================================================
+let audioContext = null;
+
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    // Se o contexto estiver suspenso, resume
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+    return audioContext;
 }
 
 // ============================================================
@@ -894,7 +914,12 @@ function finishTimer() {
     timerFinished = true;
     startBtn.textContent = '🔔 Recomeçar';
     bellMsg.textContent = '🔔';
-    playBell();
+    
+    // Toca o som com pequeno atraso para garantir que a página está ativa
+    setTimeout(() => {
+        playBell();
+    }, 100);
+    
     nextAfterTimer.style.display = 'inline-block';
     timerSeconds = 0;
     updateClock(0);
@@ -924,33 +949,23 @@ function resetTimerUI() {
     startBtn.textContent = '▶ Iniciar silêncio';
 }
 
-// ============================================================
-//  VISIBILITY API - RECUPERA O TIMER QUANDO A PÁGINA VOLTA
-// ============================================================
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        // Página foi minimizada/ocultada
-        if (timerRunning) {
-            timerRemainingOnPause = timerSeconds;
-            timerStartTime = Date.now();
-        }
-    } else {
-        // Página voltou a ficar visível
-        if (timerRunning) {
-            const now = Date.now();
-            const elapsed = (now - timerStartTime) / 1000;
-            const remaining = Math.max(0, timerRemainingOnPause - elapsed);
-            timerSeconds = Math.ceil(remaining);
-            
-            if (timerSeconds <= 0) {
-                finishTimer();
-            } else {
-                startCountdown();
-            }
-        }
-    }
-});
-
+function finishTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerRunning = false;
+    timerFinished = true;
+    startBtn.textContent = '🔔 Recomeçar';
+    bellMsg.textContent = '🔔';
+    
+    // Toca o som com pequeno atraso para garantir que a página está ativa
+    setTimeout(() => {
+        playBell();
+    }, 100);
+    
+    nextAfterTimer.style.display = 'inline-block';
+    timerSeconds = 0;
+    updateClock(0);
+}
 
     // ============================================================
     //  TIMER - CONTROLES
