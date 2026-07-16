@@ -520,7 +520,7 @@
     <header>
         <h1>Meditação Cristã <span>autêntica</span></h1>
         <p>Cf. Carta da Congregação para a Doutrina da Fé • 15 out 1989</p>
-        <div class="liturgical-badge" id="liturgicalBadge">📅 Tempo Litúrgico: Carregando...</div>
+        <div class="liturgical-badge" id="liturgicalBadge">📅 Carregando...</div>
     </header>
 
     <nav>
@@ -776,7 +776,7 @@
     function updateLiturgicalBadge() {
         const tempo = getTempoLiturgico();
         const nome = getNomeTempo(tempo);
-        document.getElementById('liturgicalBadge').textContent = `📅 Tempo Litúrgico: ${nome}`;
+        document.getElementById('liturgicalBadge').textContent = `📅 ${nome}`;
     }
 
     // ============================================================
@@ -796,18 +796,26 @@
         }
     }
 
-    // ============================================================
-    //  SOM DO SINO - 3 TOQUES
-    // ============================================================
-    function playBell() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const frequencies = [880, 660, 880];
-            const durations = [0.15, 0.15, 0.15];
-            const gaps = [0.2, 0.2, 0];
+// ============================================================
+//  SOM DO SINO - 3 SEQUÊNCIAS DE 3 TOQUES
+//  ============================================================
+function playBell() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const sequences = [
+            [880, 660, 880],  // 1ª sequência
+            [880, 660, 880],  // 2ª sequência (1 segundo depois)
+            [880, 660, 880]   // 3ª sequência (2 segundos depois)
+        ];
+        const durations = [0.15, 0.15, 0.15];
+        const gapBetweenSequences = 1.0; // 1 segundo entre sequências
+        const gapBetweenNotes = 0.2;     // 0.2 segundos entre notas
 
-            frequencies.forEach((freq, index) => {
-                const delay = gaps.slice(0, index).reduce((a, b, i) => a + b + durations[i], 0) || 0;
+        sequences.forEach((freqs, seqIndex) => {
+            const seqDelay = seqIndex * (durations.reduce((a, b) => a + b, 0) + gapBetweenSequences);
+            
+            freqs.forEach((freq, noteIndex) => {
+                const noteDelay = seqDelay + noteIndex * (durations[noteIndex] + gapBetweenNotes);
                 setTimeout(() => {
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
@@ -817,65 +825,132 @@
                     oscillator.type = 'sine';
                     gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
                     oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + durations[index]);
-                }, delay * 1000);
+                    oscillator.stop(audioCtx.currentTime + durations[noteIndex]);
+                }, noteDelay * 1000);
             });
-        } catch (e) {
-            // Fallback silencioso se o áudio não for suportado
-        }
+        });
+    } catch (e) {
+        // Fallback silencioso
     }
+}
 
-    // ============================================================
-    //  TIMER ANALÓGICO - LÓGICA
-    // ============================================================
-    let timerSeconds = 300;
-    let timerInterval = null;
-    let timerRunning = false;
-    let timerFinished = false;
-    let totalSeconds = 300;
+// ============================================================
+//  TIMER ANALÓGICO - LÓGICA PRINCIPAL (COM VISIBILITY API)
+// ============================================================
+let timerSeconds = 300;
+let totalSeconds = 300;
+let timerInterval = null;
+let timerRunning = false;
+let timerFinished = false;
+let timerStartTime = null;
+let timerRemainingOnPause = 0;
 
-    const minuteHand = document.getElementById('minuteHand');
-    const secondHand = document.getElementById('secondHand');
-    const timerDisplay = document.getElementById('timerDisplay');
-    const startBtn = document.getElementById('start-timer-btn');
-    const resetBtn = document.getElementById('reset-timer-btn');
-    const bellMsg = document.getElementById('bell-message');
-    const nextAfterTimer = document.getElementById('next-after-timer');
+const minuteHand = document.getElementById('minuteHand');
+const secondHand = document.getElementById('secondHand');
+const timerDisplay = document.getElementById('timerDisplay');
+const startBtn = document.getElementById('start-timer-btn');
+const resetBtn = document.getElementById('reset-timer-btn');
+const bellMsg = document.getElementById('bell-message');
+const nextAfterTimer = document.getElementById('next-after-timer');
 
-    function updateClock(seconds) {
-        const total = totalSeconds;
-        const elapsed = total - seconds;
-        const minuteAngle = (elapsed / total) * 360;
-        const secondAngle = ((elapsed % 60) / 60) * 360;
+function updateClock(seconds) {
+    const total = totalSeconds;
+    const elapsed = total - seconds;
+    const minuteAngle = (elapsed / total) * 360;
+    const secondAngle = ((elapsed % 60) / 60) * 360;
 
-        minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
-        secondHand.style.transform = `rotate(${secondAngle}deg)`;
+    minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
+    secondHand.style.transform = `rotate(${secondAngle}deg)`;
 
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
 
-    function resetTimerUI() {
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-        timerRunning = false;
-        timerFinished = false;
-        const selected = document.querySelector('.timer-controls .selected');
-        if (selected) {
-            timerSeconds = parseInt(selected.dataset.time) * 60;
-            totalSeconds = timerSeconds;
-        } else {
-            timerSeconds = 300;
-            totalSeconds = 300;
-        }
+function startCountdown() {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerStartTime = Date.now();
+    timerRemainingOnPause = timerSeconds;
+    
+    timerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsedSeconds = (now - timerStartTime) / 1000;
+        const remaining = Math.max(0, timerRemainingOnPause - elapsedSeconds);
+        
+        timerSeconds = Math.ceil(remaining);
         updateClock(timerSeconds);
-        bellMsg.textContent = '';
-        nextAfterTimer.style.display = 'none';
-        startBtn.textContent = '▶ Iniciar silêncio';
+        
+        if (timerSeconds <= 0) {
+            finishTimer();
+        }
+    }, 200);
+}
+
+function finishTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerRunning = false;
+    timerFinished = true;
+    startBtn.textContent = '🔔 Recomeçar';
+    bellMsg.textContent = '🔔';
+    playBell();
+    nextAfterTimer.style.display = 'inline-block';
+    timerSeconds = 0;
+    updateClock(0);
+}
+
+function resetTimerUI() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
     }
+    timerRunning = false;
+    timerFinished = false;
+    timerStartTime = null;
+    timerRemainingOnPause = 0;
+    
+    const selected = document.querySelector('.timer-controls .selected');
+    if (selected) {
+        timerSeconds = parseInt(selected.dataset.time) * 60;
+        totalSeconds = timerSeconds;
+    } else {
+        timerSeconds = 300;
+        totalSeconds = 300;
+    }
+    updateClock(timerSeconds);
+    bellMsg.textContent = '';
+    nextAfterTimer.style.display = 'none';
+    startBtn.textContent = '▶ Iniciar silêncio';
+}
+
+// ============================================================
+//  VISIBILITY API - RECUPERA O TIMER QUANDO A PÁGINA VOLTA
+// ============================================================
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Página foi minimizada/ocultada
+        if (timerRunning) {
+            timerRemainingOnPause = timerSeconds;
+            timerStartTime = Date.now();
+        }
+    } else {
+        // Página voltou a ficar visível
+        if (timerRunning) {
+            const now = Date.now();
+            const elapsed = (now - timerStartTime) / 1000;
+            const remaining = Math.max(0, timerRemainingOnPause - elapsed);
+            timerSeconds = Math.ceil(remaining);
+            
+            if (timerSeconds <= 0) {
+                finishTimer();
+            } else {
+                startCountdown();
+            }
+        }
+    }
+});
+
 
     // ============================================================
     //  TIMER - CONTROLES
@@ -922,7 +997,7 @@
                 timerRunning = false;
                 timerFinished = true;
                 startBtn.textContent = '🔔 Recomeçar';
-                bellMsg.textContent = '🔔🔔🔔 O silêncio terminou!';
+                bellMsg.textContent = '🔔';
                 playBell();
                 nextAfterTimer.style.display = 'inline-block';
                 return;
@@ -1012,7 +1087,7 @@
         }
         
         // Mostra no console qual tempo litúrgico está ativo (para depuração)
-        console.log(`📅 Tempo Litúrgico: ${getNomeTempo(tempo).toUpperCase()} | Meditação: ${med.titulo}`);
+        console.log(`📅 ${getNomeTempo(tempo).toUpperCase()} | Meditação: ${med.titulo}`);
     }
 
     function resetMeditation() {
@@ -1101,7 +1176,7 @@
         if (badge) {
             const tempo = getTempoLiturgico();
             const nome = getNomeTempo(tempo);
-            badge.textContent = `📅 Tempo Litúrgico: ${nome}`;
+            badge.textContent = `📅 ${nome}`;
         } else {
             console.warn('Elemento liturgicalBadge não encontrado!');
         }
